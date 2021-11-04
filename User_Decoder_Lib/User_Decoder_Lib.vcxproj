@@ -120,7 +120,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;USERDECODERLIB_EXPORTS;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;USERDECODERLIB_EXPORTS;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;WIN32;NOT_OUTPUT_INNER_FILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\decoder</AdditionalIncludeDirectories>
     </ClCompile>

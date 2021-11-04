@@ -104,3 +104,20 @@ USERDECODERLIB_API void decode_ins401(char* filename, char* is_parse_dr, uint32_
 		printf("\nfinished\r\n");
 	}
 }
+
+Ins401::Ins401_decoder* ins401_decoder = new Ins401::Ins401_decoder();
+// Kml_Generator::Instance()->inskml_rate = 10;
+
+USERDECODERLIB_API void decode_ins401_data(uint8_t* data, uint32_t len)
+{
+	if (ins401_decoder) 
+	{
+		int ret = 0;
+		ins401_decoder->init();
+		// ins401_decoder->set_base_file_name(dirname);
+		for (int i = 0; i < len; i++) {
+			ret = ins401_decoder->input_data(data[i]);
+		}
+
+	}
+}

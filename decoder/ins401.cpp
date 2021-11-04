@@ -58,6 +58,7 @@ void Ins401::Ins401_decoder::init()
 	crc_right_num = 0;
 	crc_error_num = 0;
 	show_format_time = 0;
+	fill_parse_string = 1;
 	memset(&raw, 0, sizeof(raw));
 	memset(&imu, 0, sizeof(imu));
 	memset(&gnss, 0, sizeof(gnss));
@@ -141,7 +142,13 @@ void Ins401::Ins401_decoder::append_ins_kml()
 void Ins401::Ins401_decoder::output_imu_raw()
 {
 	//csv
-	if (show_format_time) {
+	if(fill_parse_string)
+	{
+		sprintf(parse_buff, "%d,%11.4f,%14.10f,%14.10f,%14.10f,%14.10f,%14.10f,%14.10f\n", imu.gps_week, (double)imu.gps_millisecs / 1000.0,
+			imu.accel_x, imu.accel_y, imu.accel_z, imu.gyro_x, imu.gyro_y, imu.gyro_z);
+		update_flag = imu_update;
+	}
+	else if (show_format_time) {
 		create_file(f_imu_csv, "imu.csv",
 			"DateTime(),GPS_Week(),GPS_TimeOfWeek(s),x_accel(m/s^2),y_accel(m/s^2),z_accel(m/s^2),x_gyro(deg/s),y_gyro(deg/s),z_gyro(deg/s)\n");
 		gtime_t gpstime = gpst2time(imu.gps_week, (double)imu.gps_millisecs / 1000.0);
@@ -174,7 +181,16 @@ void Ins401::Ins401_decoder::output_gnss_sol()
 	double track_over_ground = atan2(gnss.east_vel, gnss.north_vel)*R2D;
 	double horizontal_speed = sqrt(gnss.north_vel * gnss.north_vel + gnss.east_vel * gnss.east_vel);
 	//csv
-	if (show_format_time) {		
+	if(fill_parse_string)
+	{
+		sprintf(parse_buff, "%d,%11.4f,%3d,%14.9f,%14.9f,%10.4f,%10.4f,%10.4f,%10.4f,%3d,%3d,%5.1f,%5.1f,%10.4f,%10.4f,%10.4f,%10.4f,%10.4f,%10.4f\n",
+			gnss.gps_week, (double)gnss.gps_millisecs / 1000.0, gnss.position_type, gnss.latitude, gnss.longitude, gnss.height,
+			gnss.latitude_std, gnss.longitude_std, gnss.height_std,
+			gnss.numberOfSVs, gnss.numberOfSVs_in_solution, gnss.hdop, gnss.diffage, gnss.north_vel, gnss.east_vel, gnss.up_vel,
+			gnss.north_vel_std, gnss.east_vel_std, gnss.up_vel_std);
+		update_flag = gnss_update;
+	}
+	else if (show_format_time) {		
 		create_file(f_gnss_csv, "gnss.csv",
 			"DateTime(),GPS_Week(),GPS_TimeOfWeek(s),position_type(),latitude(deg),longitude(deg),height(m),latitude_standard_deviation(m),longitude_standard_deviation(m),height_standard_deviation(m),number_of_satellites(),number_of_satellites_in_solution(),hdop(),diffage(s),north_vel(m/s),east_vel(m/s),up_vel(m/s),north_vel_standard_deviation(m/s),east_vel_standard_deviation(m/s),up_vel_standard_deviation(m/s)\n");
 		gtime_t gpstime = gpst2time(gnss.gps_week, (double)gnss.gps_millisecs / 1000.0);
@@ -214,12 +230,22 @@ void Ins401::Ins401_decoder::output_gnss_sol()
 	fprintf(f_process, "$GPVEL,%d,%11.4f,%10.4f,%10.4f,%10.4f\n",
 		gnss.gps_week, (double)gnss.gps_millisecs / 1000.0, horizontal_speed, track_over_ground, gnss.up_vel);
 #endif
-	append_gnss_kml();
+	// append_gnss_kml();
 }
 
 void Ins401::Ins401_decoder::output_ins_sol() {
 	//csv
-	if (show_format_time) {
+	if(fill_parse_string)
+	{
+		sprintf(parse_buff, "%d,%11.4f,%3d,%3d,%14.9f,%14.9f,%10.4f,%10.4f,%10.4f,%10.4f,%10.4f,%10.4f,%14.9f,%14.9f,%14.9f,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f\n",
+			ins.gps_week, (double)ins.gps_millisecs / 1000.0, ins.ins_status, ins.ins_position_type, ins.latitude, ins.longitude, ins.height,
+			ins.north_velocity, ins.east_velocity, ins.up_velocity, ins.longitudinal_velocity, ins.lateral_velocity,
+			ins.roll, ins.pitch, ins.heading, ins.latitude_std, ins.longitude_std, ins.height_std,
+			ins.north_velocity_std, ins.east_velocity_std, ins.up_velocity_std,
+			ins.long_vel_std, ins.lat_vel_std, ins.roll_std, ins.pitch_std, ins.heading_std);
+		update_flag = ins_update;
+	}
+	else if (show_format_time) {
 		create_file(f_ins_csv, "ins.csv",
 			"DateTime(),GPS_Week(),GPS_TimeOfWeek(s),ins_status(),ins_position_type(),latitude(deg),longitude(deg),height(m),north_velocity(m/s),east_velocity(m/s),up_velocity(m/s),longitudinal_velocity(m/s),lateral_velocity(m/s),roll(deg),pitch(deg),heading(deg),latitude_std(m),longitude_std(m),height_std(m),north_velocity_std(m/s),east_velocity_std(m/s),up_velocity_std(m/s),long_vel_std(m/s),lat_vel_std(m/s),roll_std(deg),pitch_std(deg),heading_std(deg)\n");
 		gtime_t gpstime = gpst2time(ins.gps_week, (double)ins.gps_millisecs / 1000.0);
@@ -259,12 +285,17 @@ void Ins401::Ins401_decoder::output_ins_sol() {
 			ins.roll, ins.pitch, ins.heading, ins.ins_position_type);		
 	}
 #endif
-	append_ins_kml();
+	// append_ins_kml();
 }
 
 
 void Ins401::Ins401_decoder::output_misa_sol() {
-	if (show_format_time) {
+	if(fill_parse_string)
+	{
+		sprintf(parse_buff, "misa.csv", "DateTime(),GPS_Week(),GPS_TimeOfWeek(s),flag(),RVB1(),RVB2(),RVB3(),CVB1(),CVB2(),CVB3()\n");
+		update_flag = misa_update;
+	}
+	else if (show_format_time) {
 		create_file(f_misa_csv, "misa.csv", "DateTime(),GPS_Week(),GPS_TimeOfWeek(s),flag(),RVB1(),RVB2(),RVB3(),CVB1(),CVB2(),CVB3()\n");
 		gtime_t gpstime = gpst2time(odo.GPS_Week, (double)odo.GPS_TimeOfWeek / 1000.0);
 		gtime_t utctime = gpst2utc(gpstime);
@@ -288,7 +319,12 @@ void Ins401::Ins401_decoder::output_misa_sol() {
 
 void Ins401::Ins401_decoder::output_odo_raw()
 {
-	if (show_format_time) {
+	if(fill_parse_string)
+	{
+		sprintf(parse_buff, "%d,%11.4f,%3d,%10.4f,%3d,%16I64d\n", odo.GPS_Week, (double)odo.GPS_TimeOfWeek / 1000.0, odo.mode, odo.speed, odo.fwd, odo.wheel_tick);
+		update_flag = odo_update;
+	}
+	else if (show_format_time) {
 		create_file(f_odo_csv, "odo.csv", "DateTime(),GPS_Week(),GPS_TimeOfWeek(s),mode(),speed(m/s),fwd(),wheel_tick()\n");
 		gtime_t gpstime = gpst2time(odo.GPS_Week, (double)odo.GPS_TimeOfWeek / 1000.0);
 		gtime_t utctime = gpst2utc(gpstime);
@@ -310,7 +346,12 @@ void Ins401::Ins401_decoder::output_odo_raw()
 }
 
 void Ins401::Ins401_decoder::output_dm_raw() {
-	if (show_format_time) {
+	if(fill_parse_string)
+	{
+		sprintf(parse_buff,  "%d,%11.3f,0x%04x,%7.1f,%7.1f\n", dm.gps_week, (double)dm.gps_millisecs / 1000.0, dm.Device_status_bit_field, dm.IMU_Unit_temperature, dm.MCU_temperature);
+		update_flag = dm_update;
+	}
+	else if (show_format_time) {
 		create_file(f_dm_csv, "dm.csv", "DateTime(),GPS_Week(),GPS_TimeOfWeek(s),Device Status(),IMU Temperature(),MCU Temperature()\n");
 		gtime_t gpstime = gpst2time(dm.gps_week, (double)dm.gps_millisecs / 1000.0);
 		gtime_t utctime = gpst2utc(gpstime);
@@ -325,8 +366,8 @@ void Ins401::Ins401_decoder::output_dm_raw() {
 
 void Ins401::Ins401_decoder::output_rover_rtcm()
 {
-	create_file(f_rover_rtcm, "_rover.rtcm", NULL);
-	fwrite(raw.buff + 6, 1, raw.length, f_rover_rtcm);
+	// create_file(f_rover_rtcm, "_rover.rtcm", NULL);
+	// fwrite(raw.buff + 6, 1, raw.length, f_rover_rtcm);
 }
 
 void Ins401::Ins401_decoder::parse_packet_payload()
@@ -452,8 +493,10 @@ int8_t Ins401::Ins401_decoder::parse_nmea(uint8_t data)
 			raw.nmea[raw.nmeabyte - 2] = 0x0A;
 			raw.nmea[raw.nmeabyte - 1] = 0;
 			raw.nmea_flag = 0;
-			create_file(f_nmea, "nmea.txt",NULL);
-			fprintf(f_nmea, (char*)raw.nmea);
+			// create_file(f_nmea, "nmea.txt",NULL);
+			// fprintf(f_nmea, (char*)raw.nmea);
+			sprintf(parse_buff, "%s",(char*)raw.nmea);
+			update_flag = nmea_update;
 			return 2;
 		}
 	}

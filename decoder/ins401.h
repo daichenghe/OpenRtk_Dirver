@@ -5,6 +5,16 @@
 #include "kml.h"
 
 namespace Ins401 {
+
+enum parse_update_flag{
+	imu_update = 0x01,
+	gnss_update = 0x02,
+	ins_update = 0x03,
+	misa_update = 0x04,
+	odo_update = 0x05,
+	dm_update = 0x06,
+	nmea_update = 0x07
+};
 #pragma pack(push, 1)
 	typedef struct {
 		uint8_t nmea_flag;
@@ -132,6 +142,7 @@ namespace Ins401 {
 		uint32_t	Device_status_bit_field;
 		float		IMU_Unit_temperature;
 		float		MCU_temperature;
+		
 	}diagnostic_msg_t;
 
 	typedef struct
@@ -243,6 +254,9 @@ namespace Ins401 {
 		FILE* f_ins_log;
 		FILE* f_ins_save;
 		bool show_format_time;
+		bool fill_parse_string;
+		uint32_t update_flag;
+		char parse_buff[512];
 		int pack_num;
 		int crc_right_num;
 		int crc_error_num;
