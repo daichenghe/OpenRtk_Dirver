@@ -119,7 +119,7 @@ void decode_ins401_interface(char* filename, char* is_parse_dr)
 	delete ins401_decoder;
 }
 
-void decode_beidou_interface(char* filename)
+void decode_beidou_interface(char* filename, uint32_t kml_rate)
 {
 	FILE* file = fopen(filename, "rb");
 	if (file) {
@@ -130,6 +130,7 @@ void decode_beidou_interface(char* filename)
 		size_t readcount = 0;
 		char read_cache[READ_CACHE_SIZE] = { 0 };
 		beidou_Tool::set_output_beidou_file(1);
+		beidou_Tool::set_ins_kml_rate(kml_rate);
 		createDirByFilePath(filename, dirname);
 		beidou_Tool::set_base_beidou_file_name(dirname);
 		while (!feof(file)) {

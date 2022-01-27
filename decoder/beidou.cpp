@@ -45,7 +45,7 @@ namespace beidou_Tool {
 	static FILE* f_s1 = NULL;
 	static FILE* f_heading = NULL;
 	static char base_beidou_file_name[256] = { 0 };
-
+	static uint32_t beidou_kml_rate = 1;
 	int crc_error_num = 0;
 	double	last_GPS_TimeOfWeek = 0.0;
 
@@ -64,7 +64,12 @@ namespace beidou_Tool {
 		memset(&beidou_pak_o1, 0, sizeof(beidou_o1_t));
 		memset(&beidou_pak_hG, 0, sizeof(beidou_hG_t));
 		Kml_Generator::Instance()->init();
-		Kml_Generator::Instance()->set_kml_frequency(100);
+		Kml_Generator::Instance()->set_kml_frequency(beidou_kml_rate);
+	}
+
+	void set_ins_kml_rate(uint32_t kml_rate)
+	{
+		beidou_kml_rate = (1000/kml_rate);
 	}
 
 	extern void set_output_beidou_file(int output) {
@@ -345,7 +350,7 @@ namespace beidou_Tool {
 			beidou_pak_s1.accel_g[0], beidou_pak_s1.accel_g[1], beidou_pak_s1.accel_g[2], beidou_pak_s1.rate_dps[0], beidou_pak_s1.rate_dps[1], beidou_pak_s1.rate_dps[2]);
 		write_beidou_log_file(beidou_raw.ntype, beidou_output_msg);
 		
-		sprintf(beidou_output_process, "%d,%11.4f,   %14.10f,%14.10f,%14.10f,%14.10f,%14.10f,%14.10f\n", beidou_pak_s1.week, beidou_pak_s1.timeOfWeek,
+		sprintf(beidou_output_process, "%d,%11.4f,   ,%14.10f,%14.10f,%14.10f,%14.10f,%14.10f,%14.10f\n", beidou_pak_s1.week, beidou_pak_s1.timeOfWeek,
 			beidou_pak_s1.accel_g[0], beidou_pak_s1.accel_g[1], beidou_pak_s1.accel_g[2], beidou_pak_s1.rate_dps[0], beidou_pak_s1.rate_dps[1], beidou_pak_s1.rate_dps[2]);
 		////txt
 		//sprintf(beidou_output_msg, "%d,%11.4f,    ,%14.10f,%14.10f,%14.10f,%14.10f,%14.10f,%14.10f\n", beidou_pak_s1.GPS_Week, beidou_pak_s1.GPS_TimeOfWeek,

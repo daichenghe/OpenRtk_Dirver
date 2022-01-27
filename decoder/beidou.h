@@ -102,5 +102,5 @@ namespace beidou_Tool {
 	extern void close_beidou_all_log_file();
 
 	extern int input_beidou_raw(uint8_t data);
-
+	void set_ins_kml_rate(uint32_t kml_rate);
 }
