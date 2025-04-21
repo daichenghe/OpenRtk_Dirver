@@ -24,6 +24,7 @@
         "src/decoder/openrtk_user.cpp",
         "src/decoder/rtcm_split.cpp",
         "src/decoder/rtk330la_decoder.cpp",
+        "src/decoder/rtk350la.cpp",
         "src/decoder/SplitByTime.cpp"
       ],
       'cflags!': [ '-fno-exceptions'],

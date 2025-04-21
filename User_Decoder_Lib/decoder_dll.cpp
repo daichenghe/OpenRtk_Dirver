@@ -30,3 +30,8 @@ USERDECODERLIB_API void decode_ins401c(char* filename)
 {
 	decode_ins401c_interface(filename);
 }
+
+USERDECODERLIB_API void decode_rtk350la(char* filename)
+{
+	decode_rtk350la_interface(filename, false);
+}

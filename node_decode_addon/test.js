@@ -95,5 +95,11 @@ function test_file_rtk330la(){
     });
 }
 
+function test_decode_rtk350la(){
+    const decodeFile = 'D:\\data\\user_port1_2023_08_01_08_32_11.bin';
+    emitter.DecodeRtk350la(decodeFile)
+}
+
 // test_file_rtk330la();
-test_file_ins401();
+//test_file_ins401();
+test_decode_rtk350la();

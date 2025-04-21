@@ -19,3 +19,5 @@ extern "C" USERDECODERLIB_API void decode_ins401(char* filename, char* is_parse_
 extern "C" USERDECODERLIB_API void decode_beidou(char* filename);
 
 extern "C" USERDECODERLIB_API void decode_ins401c(char* filename);
+
+extern "C" USERDECODERLIB_API void decode_rtk350la(char* filename);

@@ -84,6 +84,9 @@
     <ClInclude Include="getopt.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\decoder\rtk350la.h">
+      <Filter>decoder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\decoder\imu_raw.cpp">
@@ -145,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="getopt.c">
       <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\decoder\rtk350la.cpp">
+      <Filter>decoder</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

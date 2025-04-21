@@ -45,6 +45,7 @@ class decodeEmitter : public Napi::ObjectWrap<decodeEmitter> {
   Napi::Value InitRtk330la(const Napi::CallbackInfo& info);
   Napi::Value InputRtk330laBuffer(const Napi::CallbackInfo& info);
   Napi::Value DecodeRtk330la(const Napi::CallbackInfo& info);
+  Napi::Value DecodeRtk350la(const Napi::CallbackInfo& info);
   Napi::Value SplitPostInsByTime(const Napi::CallbackInfo& info);
   Napi::Value CalcRoll(const Napi::CallbackInfo& info);
   Napi::Value CalcPitchHeading(const Napi::CallbackInfo& info);

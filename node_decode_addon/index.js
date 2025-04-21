@@ -104,7 +104,11 @@ class DecoderEmitter extends EventEmitter {
 
     DecodeRtk330la(filename){
         this.emitter.DecodeRtk330la(filename);
-    } 
+    }
+    
+    DecodeRtk350la(filename){
+        this.emitter.DecodeRtk350la(filename);
+    }
 
     SplitPostInsByTime(filename){
         console.log("SplitPostInsByTime:",filename);

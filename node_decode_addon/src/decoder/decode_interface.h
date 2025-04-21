@@ -12,3 +12,5 @@ void decode_beidou_interface(char* filename);
 void decode_npos122_interface(char* filename);
 
 void decode_ins401c_interface(char* filename);
+
+void decode_rtk350la_interface(char* filename, bool pruned = false);

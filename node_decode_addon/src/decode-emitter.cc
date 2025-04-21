@@ -6,7 +6,9 @@
 #include "decode-emitter.h"
 #include "common_func.h"
 #include "common.h"
+#ifdef WIN32
 #include <windows.h>
+#endif
 
 #define MI_OUTPUT_FILE
 
@@ -47,6 +49,7 @@ Napi::Object decodeEmitter::Init(Napi::Env env, Napi::Object exports) {
                   InstanceMethod("InitRtk330la", &decodeEmitter::InitRtk330la),
                   InstanceMethod("InputRtk330laBuffer", &decodeEmitter::InputRtk330laBuffer),
                   InstanceMethod("DecodeRtk330la", &decodeEmitter::DecodeRtk330la),
+                  InstanceMethod("DecodeRtk350la", &decodeEmitter::DecodeRtk350la),
                   InstanceMethod("SplitPostInsByTime", &decodeEmitter::SplitPostInsByTime),
                   InstanceMethod("CalcRoll", &decodeEmitter::CalcRoll),
                   InstanceMethod("CalcPitchHeading", &decodeEmitter::CalcPitchHeading)});
@@ -322,6 +325,20 @@ Napi::Value decodeEmitter::DecodeRtk330la(const Napi::CallbackInfo& info){
   return Napi::String::New(env, "OK");
 }
 
+Napi::Value decodeEmitter::DecodeRtk350la(const Napi::CallbackInfo& info){
+  Napi::Env env = info.Env();
+  if (!info[0].IsString()) 
+  {
+      Napi::Error::New(info.Env(), "Expected an Buffer").ThrowAsJavaScriptException();
+      return info.Env().Undefined();
+  }
+  char file_name[1024] = {0};
+  std::string filename = info[0].As<Napi::String>().ToString();
+  strcpy(file_name,filename.c_str());
+	decode_rtk350la_interface(file_name);
+  return Napi::String::New(env, "OK");
+}
+
 void readRollFromIns(FILE* f_ins,std::vector<stTimeSlice>& time_slices,std::vector<stAngle>& angle_list) {
 	if (f_ins) {
 		char line[256] = { 0 };
@@ -511,8 +528,11 @@ Napi::Value decodeEmitter::CalcPitchHeading(const Napi::CallbackInfo& info)
     std::string exefilePath = m_ExePath + "\\solveMisalign.exe";
     sprintf(outprefix,"%s\\misalign_%d-%d",file_dir,start_time,end_time);
     sprintf(cmd,"%s -t \"%s\" -o \"%s\"  -rng %d %d %d", exefilePath.c_str(), file_name, outprefix, start_time, end_time, week);
+#ifdef WIN32
     run_process(cmd);
-    // system(cmd);
+#else
+    system(cmd);
+#endif
     sprintf(resultfilePath,"%s%s",outprefix,"_content_misalign.txt");
     stAngle angle = { 0 };
     int try_count = 0;

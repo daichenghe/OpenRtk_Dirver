@@ -13,6 +13,11 @@ void decode_rtk330la(char* filename,bool pruned)
 	decode_rtk330la_interface(filename,pruned);
 }
 
+void decode_rtk350la(char* filename,bool pruned)
+{
+	decode_rtk350la_interface(filename, pruned);
+}
+
 void decode_ins401(char* filename, bool pruned)
 {
 	char is_parse_dr[] = "false";
@@ -26,9 +31,13 @@ void decode_ins401c(char* filename)
 
 void print_help() {
 	printf("User_Decoder_Console.exe -t [filetype] -f [filename] -p(pruned) \n");
-	printf("-t <filetype>\tSelect [openrtk|rtk330la|ins401|beidou|npos122|ins401c] \n");
+	printf("-t <filetype>\tSelect [openrtk|rtk330la|ins401|beidou|npos122|ins401c|RTK350LA] \n");
 	printf("-f <filename>\tPath of the file to be decoded.\n");
 	printf("-p <pruned>\tCut out all the files that do not need.\n");
+}
+
+void print_version() {
+	printf("Version: 20230907.1723\n");
 }
 
 int main(int argc, char* argv[]) {
@@ -52,8 +61,11 @@ int main(int argc, char* argv[]) {
 		else if (strcmp(argv[1], "-ins401c") == 0) {
 			decode_ins401c(filename);
 		}
+		else if (strcmp(argv[1], "-RTK350LA") == 0) {
+			decode_rtk350la(filename, false);
+		}        
 		else {
-			printf("User_Decoder_Console.exe -u(OpenRTK330LI)|i(RTK330LA)|ins401|ins401c|beidou|npos122 <filename> \n");
+			printf("User_Decoder_Console.exe -u(OpenRTK330LI)|i(RTK330LA)|ins401|ins401c|beidou|npos122|RTK350LA <filename> \n");
 		}
 	}
 	else if (argc > 3) {
@@ -106,6 +118,15 @@ int main(int argc, char* argv[]) {
 			decode_ins401c(filepath);
 		}
 
+	}
+	else if (argc == 2) {
+		if (strcmp(argv[1], "-v") == 0) {
+			print_version();
+		}
+		else
+		{
+			print_help();
+		}
 	}
 	else {
 		print_help();

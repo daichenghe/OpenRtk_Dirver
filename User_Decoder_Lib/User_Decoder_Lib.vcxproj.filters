@@ -75,6 +75,9 @@
     <ClCompile Include="..\decoder\ins401c.cpp">
       <Filter>decoder</Filter>
     </ClCompile>
+    <ClCompile Include="..\decoder\rtk350la.cpp">
+      <Filter>decoder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="decoder_dll.h">
@@ -141,6 +144,9 @@
       <Filter>decoder</Filter>
     </ClInclude>
     <ClInclude Include="..\decoder\ins401c.h">
+      <Filter>decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\decoder\rtk350la.h">
       <Filter>decoder</Filter>
     </ClInclude>
   </ItemGroup>

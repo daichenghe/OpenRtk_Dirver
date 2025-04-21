@@ -59,6 +59,7 @@ namespace Ins401_Tool {
         all_type_pack_num[em_GNSS_PVT] = 0;
 		all_type_pack_num[em_MOVBS_SOL] = 0;
         all_type_pack_num[em_HEADING_SOL] = 0;
+        all_type_pack_num[em_GNSS_HEADING_SOL] = 0;
 		all_type_pack_num[em_INS_SOL] = 0;
 		all_type_pack_num[em_RAW_ODO] = 0;
 		all_type_pack_num[em_DIAGNOSTIC_MSG] = 0;
@@ -83,6 +84,7 @@ namespace Ins401_Tool {
         all_type_file_output[em_GNSS_PVT] = 1;
 		all_type_file_output[em_MOVBS_SOL] = 1;
         all_type_file_output[em_HEADING_SOL] = 1;
+        all_type_file_output[em_GNSS_HEADING_SOL] = 1;
 		all_type_file_output[em_INS_SOL] = 1;
 		all_type_file_output[em_RAW_ODO] = 1;
 		all_type_file_output[em_DIAGNOSTIC_MSG] = 1;
@@ -819,25 +821,83 @@ namespace Ins401_Tool {
 	{
 		std::string title = 
 			"GPS_Week(),GPS_TimeOfWeek(s)"
-			",length(m),heading(),pitch(),roll()"
+			",soltype(),length(m),heading(deg),pitch(),roll()"
+			",heading_sd(deg),length_sd(m)\n";
+		FILE* f_heading_csv = get_file("hG.csv", title);
+        if (f_heading_csv)
+        {
+            fprintf(f_heading_csv, "%d,%06d,", heading.gps_week, heading.gps_millisecs/1000);
+            fprintf(f_heading_csv, "%2d,%10.6f,%10.6f,%10.6f,%10.6f,", heading.soltype, heading.length, heading.heading, heading.pitch, heading.roll);
+            fprintf(f_heading_csv, "%10.6f,%10.6f\n", heading.heading_sd, heading.length_sd);
+        }
+
+	}    
+
+	void Ins401_decoder::output_heading_early_sol()
+	{
+		std::string title = 
+			"GPS_Week(),GPS_TimeOfWeek(s)"
+			",length(m),heading(deg),pitch(),roll()"
 			",hdgstddev(),ptchstddev()\n";
 		FILE* f_heading_csv = get_file("hG.csv", title);
         if (f_heading_csv)
         {
-            fprintf(f_heading_csv, "%d,%11.4f,", heading.gps_week, (double)heading.gps_millisecs);
-            fprintf(f_heading_csv, "%10.6f,%10.6f,%10.6f,%10.6f,", heading.length, heading.heading, heading.pitch, heading.roll);
-            fprintf(f_heading_csv, "%10.6f,%10.6f\n", heading.hdgstddev, heading.ptchstddev);
+            fprintf(f_heading_csv, "%d,%11.4f,", heading_early.gps_week, (double)heading_early.gps_millisecs);
+            fprintf(f_heading_csv, "%10.6f,%10.6f,%10.6f,%10.6f,", heading_early.length, heading_early.heading, heading_early.pitch, heading_early.roll);
+            fprintf(f_heading_csv, "%10.6f,%10.6f\n", heading_early.hdgstddev, heading_early.ptchstddev);
+        }
+	}
+
+
+	void Ins401_decoder::output_gnss_heading_sol()
+	{
+		std::string title = 
+			"GPS_Week(),GPS_TimeOfWeek(s)"
+			",soltype(),heading(),length(m),heading_sd()"
+			",heading_sd()\n";
+		FILE* f_heading_csv = get_file("gnss_heading.csv", title);
+        if (f_heading_csv)
+        {
+            fprintf(f_heading_csv, "%d,%06d,", gnss_heading.gps_week, gnss_heading.gps_millisecs/1000);
+            fprintf(f_heading_csv, "%2d,%10.6f,%10.6f,", gnss_heading.soltype, gnss_heading.heading, gnss_heading.length);
+            fprintf(f_heading_csv, "%10.6f,%10.6f\n", gnss_heading.heading_sd, gnss_heading.length_sd);
         }
 
 	}    
+
 	void Ins401_decoder::output_heading_sol_process()
 	{
 #ifdef OUTPUT_INNER_FILE
 		//process
 		FILE* f_process = get_file("process");
 		if (f_process) {
-			fprintf(f_process, "$GPHEADING,%d,%11.4f,%10.6f,%10.6f,%10.6f,%10.6f,%10.6f\n", heading.gps_week, heading.gps_millisecs,
-				heading.length, heading.heading, heading.pitch, heading.hdgstddev, heading.ptchstddev);
+			fprintf(f_process, "$GPHEADING,%d,%6d,%10.6f,%10.6f,%10.6f,%10.6f,%10.6f\n", heading.gps_week, heading.gps_millisecs/1000,
+				heading.length, heading.heading, heading.pitch, heading.heading_sd, heading.length_sd);
+		}
+#endif
+	}
+
+	void Ins401_decoder::output_heading_early_sol_process()
+	{
+#ifdef OUTPUT_INNER_FILE
+		//process
+		FILE* f_process = get_file("process");
+		if (f_process) {
+			fprintf(f_process, "$GPHEADING,%d,%11.4f,%10.6f,%10.6f,%10.6f,%10.6f,%10.6f\n", heading_early.gps_week, heading_early.gps_millisecs,
+				heading_early.length, heading_early.heading, heading_early.pitch, heading_early.hdgstddev, heading_early.ptchstddev);
+		}
+#endif
+	}
+
+
+	void Ins401_decoder::output_gnss_heading_sol_process()
+	{
+#ifdef OUTPUT_INNER_FILE
+		//process
+		FILE* f_process = get_file("process");
+		if (f_process) {
+			fprintf(f_process, "$GPHEADING,%d,%6d,%10.6f,%10.6f,%10.6f,%10.6f,%2d\n", gnss_heading.gps_week, gnss_heading.gps_millisecs / 1000,
+				gnss_heading.length, gnss_heading.heading, gnss_heading.heading_sd, gnss_heading.length_sd, gnss_heading.soltype);
 		}
 #endif
 	}
@@ -1077,14 +1137,34 @@ namespace Ins401_Tool {
         case em_HEADING_SOL:
         {
 			size_t packet_size = sizeof(heading_t);
+			size_t packet_early_size = sizeof(heading_early_t); //for mosaic
+
 			if (raw.length == packet_size) {
 				memcpy(&heading, payload, packet_size);
 				if (!m_isOutputFile) break;
 				output_heading_sol_process();
 				if (is_pruned) break;
 				output_heading_sol();
+			}
+			else if (raw.length == packet_early_size) {
+				memcpy(&heading_early, payload, packet_early_size);
+				if (!m_isOutputFile) break;
+				output_heading_early_sol_process();
+				if (is_pruned) break;
+				output_heading_early_sol();
 			}            
-        }
+        }break;
+        case em_GNSS_HEADING_SOL:
+        {
+			size_t packet_size = sizeof(binary_gnss_heading_t);
+			if (raw.length == packet_size) {
+				memcpy(&gnss_heading, payload, packet_size);
+				if (!m_isOutputFile) break;
+				output_gnss_heading_sol_process();
+				if (is_pruned) break;
+				output_gnss_heading_sol();
+			}            
+        }break;
 		case em_INS_SOL:
 		{
 			size_t packet_size_20211207 = sizeof(ins_sol_t_20211207);
@@ -1455,8 +1535,9 @@ namespace Ins401_Tool {
 				}
 				else
 				{
-					if (raw.length > 270 && raw.packet_type != em_COR_IMU) {
-						printf("type = %04x, length = %d\n", raw.packet_type, raw.length);
+					if (raw.length > 500 && raw.packet_type != em_COR_IMU) 
+                    {
+						// printf("type = %04x, length = %d\n", raw.packet_type, raw.length);
 					}
 				}
 			}
